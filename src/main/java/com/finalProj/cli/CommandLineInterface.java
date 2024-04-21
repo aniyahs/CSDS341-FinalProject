@@ -33,24 +33,27 @@ public class CommandLineInterface {
 
         //scanner to read input
         Scanner myObj = new Scanner(System.in);
-        String inpDeptName, inpBuilding;
+        String custEmail, custPW;
         float inpBudget;
 
-        // Enter username and press Enter
-        System.out.println("Enter dept_name then enter. ");
-        inpDeptName = myObj.nextLine();
-        System.out.println("Enter Building then enter.");
-        inpBuilding = myObj.nextLine();
+        // Enter username and password and press Enter
+        System.out.println("Please enter your email: ");
+        custEmail = myObj.nextLine();
+        System.out.println("Please enter your password: ");
+        custPW = myObj.nextLine();
+
+        // check that the username and pw match User table, if they don't ask if they want to enter their information into the system
+        // if Y then create user, if N then continue as 'Guest'
+
         System.out.println("Enter budget max of 12 digits with the last two following the decimal point then hit enter. ");
         inpBudget = myObj.nextFloat();
         myObj.close();
-        System.out.println("Dept: " + inpDeptName + " Building: " + inpBuilding + " Budget: " + inpBudget);
+
         String insertSql = "INSERT INTO department (dept_name, building, budget) " + " values (?, ?, ?); " ;
         ResultSet resultSet = null;
 
         try (Connection connection = DriverManager.getConnection(connectionUrl);
-            PreparedStatement prepsInsert = connection.prepareStatement(insertSql,
-            Statement.RETURN_GENERATED_KEYS);) {
+            PreparedStatement prepsInsert = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);) {
                 prepsInsert.setString(1, inpDeptName);
                 prepsInsert.setString(2, inpBuilding);
                 prepsInsert.setFloat(3,inpBudget);
@@ -69,5 +72,13 @@ public class CommandLineInterface {
         catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void printTable(String table) {
+
+    }
+
+    private static void printColFromTable(String column, String table) {
+
     }
 }
