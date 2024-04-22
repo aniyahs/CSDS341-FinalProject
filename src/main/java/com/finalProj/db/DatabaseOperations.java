@@ -5,5 +5,7 @@ package main.java.com.finalProj.db;
  */
 public class DatabaseOperations {
 
-    
+    public static void populateDatabase() {
+        
+    }
 }

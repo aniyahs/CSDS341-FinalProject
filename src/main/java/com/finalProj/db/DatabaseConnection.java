@@ -5,8 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String JDBC_URL = "jdbc:sqlserver://cxp-sql-02;databaseName=OnlineOrders;user=aas278;password=VCyBedcpKohw87";
-    private static final String USERNAME = "aas278";
+    private static final String JDBC_URL = "jdbc:sqlserver://cxp-sql-03;databaseName=OnlineOrders;user=lmd117;password=VCyBedcpKohw87";
+    private static final String USERNAME = "lmd117";
     private static final String PASSWORD = "VCyBedcpKohw87";
 
     public static Connection getConnection() throws SQLException {
