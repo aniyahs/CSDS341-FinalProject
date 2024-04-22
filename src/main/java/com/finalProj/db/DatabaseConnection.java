@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String JDBC_URL = "";
-    private static final String USERNAME = "";
-    private static final String PASSWORD = "";
+    private static final String JDBC_URL = "jdbc:sqlserver://cxp-sql-02;databaseName=OnlineOrders;user=aas278;password=VCyBedcpKohw87";
+    private static final String USERNAME = "aas278";
+    private static final String PASSWORD = "VCyBedcpKohw87";
 
     public static Connection getConnection() throws SQLException {
         try {
