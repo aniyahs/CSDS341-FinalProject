@@ -1,0 +1,71 @@
+CREATE TABLE Customer(
+    id INT IDENTITY(1000,1) PRIMARY KEY,
+    first_name NVARCHAR(255) NOT NULL,
+    last_name NVARCHAR(255) NOT NULL,
+    email NVARCHAR(255)
+);
+
+CREATE TABLE Orders (
+    id INT IDENTITY(1000,1) PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL,
+    status NVARCHAR(255),
+    price DECIMAL(18,2),
+    order_date DATE,
+    customer_id INT, 
+    FOREIGN KEY (customer_id) REFERENCES Customer(id) 
+);
+
+
+CREATE TABLE Payment (
+    id INT IDENTITY(1000,1) PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL,
+    amount_paid DECIMAL(18,2),
+    payment_date DATE,
+    orders_id INT,  
+    FOREIGN KEY (orders_id) REFERENCES Orders(id) 
+);
+
+CREATE TABLE Category (
+    id INT IDENTITY(1000,1) PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL,
+);
+
+
+CREATE TABLE Product (
+    id INT IDENTITY(1000,1) PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL,
+    description NVARCHAR(255), 
+    price DECIMAL(18,2),
+    quantity INT, 
+    category_id INT,
+    FOREIGN KEY (category_id) REFERENCES Category(id)
+);
+
+CREATE TABLE Order_items (
+    id INT IDENTITY(1000,1) PRIMARY KEY,
+    quantity INT,
+    product_id INT,  
+    orders_id INT,  
+    FOREIGN KEY (product_id) REFERENCES Product(id),  
+    FOREIGN KEY (orders_id) REFERENCES Orders(id)      
+);
+
+
+CREATE TABLE Shipping (
+    id INT IDENTITY(1000,1) PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL,
+    shipping_address NVARCHAR(255),  
+    shipping_status NVARCHAR(255),   
+    order_id INT,                  
+    FOREIGN KEY (order_id) REFERENCES Orders(id)
+);
+
+
+
+CREATE TABLE Promotions (
+    id INT IDENTITY(1000,1) PRIMARY KEY,
+    promotion_name NVARCHAR(255) NOT NULL,
+    discount_amount DECIMAL(18,2),
+    start_date DATE,
+    end_date DATE,
+);
