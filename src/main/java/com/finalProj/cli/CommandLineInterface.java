@@ -24,7 +24,7 @@ import main.java.com.finalProj.db.DatabaseConnection;
 public class CommandLineInterface {
 // Connect to your database.
 // Replace server name, username, and password with your credentials
-    public static void main() {
+    public static void main() throws SQLException {
         String connectionUrl =
             "jdbc:sqlserver://cxp-sql-02\\abc123;"  // TODO: Change this line to mathc our server
             + "database=OnlineOrders;"
@@ -37,6 +37,7 @@ public class CommandLineInterface {
         //scanner to read input
         Scanner myObj = new Scanner(System.in);
         String custEmail, custName;
+        String deptSelection;
 
         // Enter username and email and press Enter
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -47,15 +48,20 @@ public class CommandLineInterface {
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("");
 
-        //System.out.println("Enter budget max of 12 digits with the last two following the decimal point then hit enter. ");
-        //inpBudget = myObj.nextFloat();
-        myObj.close();
-
-        // check that the username and email match user table, if they don't, ask if they want to enter their info into the system
-        // if Y then create user, if N then continue as 'Guest'
+        //myObj.close();
+        // check that name and email are in database
+        checkUserInDB(custName, custEmail, myObj);
 
         // print out menu and ask for input on what to do next
+        printMenu();
+        System.out.println("What would you like to do?");
+        deptSelection = myObj.nextLine();
+        findCategory(deptSelection);
 
+        myObj.close();
+    }
+
+    private static void printMenu() {
         ResultSet resultSet = null;
 
         try(Connection connection = DatabaseConnection.getConnection(); Statement statement = connection.createStatement();) {
@@ -70,56 +76,82 @@ public class CommandLineInterface {
 
             System.out.println("Promotions");
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        }
-
-        String insertSql = "INSERT INTO department (dept_name, building, budget) " + " values (?, ?, ?); " ;
-        ResultSet resultSet = null;
-
-        try (Connection connection = DriverManager.getConnection(connectionUrl);
-            PreparedStatement prepsInsert = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);) {
-                prepsInsert.setString(1, custName);
-                prepsInsert.setString(2, custEmail);
-                prepsInsert.setString(3,custName);
-                connection.setAutoCommit(false);
-                prepsInsert.execute();
-                // Retrieve the generated key from the insert. None in this example.
-                resultSet = prepsInsert.getGeneratedKeys();
-                // Print the ID of the inserted row. Again, will be null because no keys auto gen
-
-                while (resultSet.next()) {
-                    System.out.println("Generated: " + resultSet.getString(1));
-                }
-                connection.commit();
-            }
-         // Handle any errors that may have occurred.
-        catch (SQLException e) {
+        } catch (SQLException e){
             e.printStackTrace();
         }
     }
 
-    private static void printMenu(String conURL) {
+    private static void findCategory(String catInput) {
         ResultSet resultSet = null;
 
-        // try(Connection connection = DatabaseConnection.getConnection(); Statement statement = connection.createStatement();) {
-        //     String getCategories = "SELECT name FROM Categories";
+        try(Connection connection = DatabaseConnection.getConnection(); Statement statement = connection.createStatement();) {
+            String findCatSql = 
+                "SELECT name, description, price, quantity FROM Products p JOIN Categories c ON c.category_id = p.category_id WHERE c.name = " + catInput;
 
-        //     resultSet = statement.executeQuery(getCategories);
+            resultSet = statement.executeQuery(findCatSql);
 
-        //     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        //     while(resultSet.next()) {
-        //         System.out.println(resultSet.getString(0));
-        //     }
-
-        //     System.out.println("Promotions");
-        //     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        // }
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            while(resultSet.next()) {
+                System.out.println(resultSet.getString(0));
+            }
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private static void printTable(String table) {
 
-    }
+    // check that the username and email match user table, 
+    // if they don't, ask if they want to enter their info into the system
+    // if Y then create user, if N then continue as 'Guest'
+    private static void checkUserInDB(String custName, String custEmail, Scanner myObj) {
+        try (Connection connection = DatabaseConnection.getConnection(); Statement statement = connection.createStatement();) {
 
-    private static void printColFromTable(String column, String table) {
+            String checkCustNamesql = "SELECT * FROM User WHERE name = '" + custName + "' AND email = '" + custEmail + "'";
+            ResultSet resultSet = statement.executeQuery(checkCustNamesql);
 
+            if (resultSet.next()) {
+                // User exists
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.println("Welcome, " + custName);
+            } else {
+                // User does not exist
+                System.out.println("Name and Email do not match any existing user.");
+                System.out.println("Would you like to create an account? (Y/N)");
+
+                // Code to handle user input here (e.g., using Scanner)
+                String userInput = myObj.nextLine();
+
+                if (userInput.equalsIgnoreCase("Y")) {
+                    // Code to create user account goes here
+                    System.out.println("Creating new User Account...");
+                    System.out.println("Please enter your address: ");
+                    String custAddr = myObj.nextLine();
+                    String insertSql = "INSERT INTO customers (name, email, address) " + " values (?, ?, ?); " ;
+
+                    try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
+                        insertStmt.setString(1, custName);
+                        insertStmt.setString(2, custEmail);
+                        insertStmt.setString(3, custAddr);
+                
+                        int rowsAffected = insertStmt.executeUpdate();
+                        if (rowsAffected > 0) {
+                            System.out.println("User account created successfully!");
+                        } else {
+                            System.out.println("Failed to create user account.");
+                        }
+                    } catch (SQLException se) {
+                        se.printStackTrace();
+                    }
+
+                } else {
+                    // Continue as guest
+                    System.out.println("Continuing as guest...");
+                }
+            }
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        } catch (SQLException se) {
+            se.printStackTrace();
+        }
     }
 }
