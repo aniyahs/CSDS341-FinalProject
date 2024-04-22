@@ -16,12 +16,15 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Scanner;
 import java.sql.SQLException;
+import java.util.Scanner;
+
+import main.java.com.finalProj.db.DatabaseConnection;
+
 public class CommandLineInterface {
 // Connect to your database.
 // Replace server name, username, and password with your credentials
-    public static void main(String[] args) {
+    public static void main() {
         String connectionUrl =
             "jdbc:sqlserver://cxp-sql-02\\abc123;"  // TODO: Change this line to mathc our server
             + "database=OnlineOrders;"
@@ -33,30 +36,50 @@ public class CommandLineInterface {
 
         //scanner to read input
         Scanner myObj = new Scanner(System.in);
-        String custEmail, custPW;
-        float inpBudget;
+        String custEmail, custName;
 
-        // Enter username and password and press Enter
+        // Enter username and email and press Enter
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("Please enter your email: ");
         custEmail = myObj.nextLine();
-        System.out.println("Please enter your password: ");
-        custPW = myObj.nextLine();
+        System.out.println("Please enter your name: ");
+        custName = myObj.nextLine();
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("");
 
-        // check that the username and pw match User table, if they don't ask if they want to enter their information into the system
+        //System.out.println("Enter budget max of 12 digits with the last two following the decimal point then hit enter. ");
+        //inpBudget = myObj.nextFloat();
+        myObj.close();
+
+        // check that the username and email match user table, if they don't, ask if they want to enter their info into the system
         // if Y then create user, if N then continue as 'Guest'
 
-        System.out.println("Enter budget max of 12 digits with the last two following the decimal point then hit enter. ");
-        inpBudget = myObj.nextFloat();
-        myObj.close();
+        // print out menu and ask for input on what to do next
+
+        ResultSet resultSet = null;
+
+        try(Connection connection = DatabaseConnection.getConnection(); Statement statement = connection.createStatement();) {
+            String getCategories = "SELECT name FROM Categories";
+
+            resultSet = statement.executeQuery(getCategories);
+
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            while(resultSet.next()) {
+                System.out.println(resultSet.getString(0));
+            }
+
+            System.out.println("Promotions");
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
 
         String insertSql = "INSERT INTO department (dept_name, building, budget) " + " values (?, ?, ?); " ;
         ResultSet resultSet = null;
 
         try (Connection connection = DriverManager.getConnection(connectionUrl);
             PreparedStatement prepsInsert = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);) {
-                prepsInsert.setString(1, inpDeptName);
-                prepsInsert.setString(2, inpBuilding);
-                prepsInsert.setFloat(3,inpBudget);
+                prepsInsert.setString(1, custName);
+                prepsInsert.setString(2, custEmail);
+                prepsInsert.setString(3,custName);
                 connection.setAutoCommit(false);
                 prepsInsert.execute();
                 // Retrieve the generated key from the insert. None in this example.
@@ -72,6 +95,24 @@ public class CommandLineInterface {
         catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void printMenu(String conURL) {
+        ResultSet resultSet = null;
+
+        // try(Connection connection = DatabaseConnection.getConnection(); Statement statement = connection.createStatement();) {
+        //     String getCategories = "SELECT name FROM Categories";
+
+        //     resultSet = statement.executeQuery(getCategories);
+
+        //     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        //     while(resultSet.next()) {
+        //         System.out.println(resultSet.getString(0));
+        //     }
+
+        //     System.out.println("Promotions");
+        //     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        // }
     }
 
     private static void printTable(String table) {
